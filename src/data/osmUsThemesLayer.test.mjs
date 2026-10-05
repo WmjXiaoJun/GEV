@@ -8,6 +8,7 @@ import {
   rectangleToOsmBbox,
   createOsmUsThemesLayer,
 } from './osmUsThemesLayer.js';
+import { getLocale, setLocale } from '../i18n.js';
 
 function event() {
   const listeners = new Set();
@@ -60,37 +61,43 @@ const featureCollection = ({ name = 'Test', updatedAt = null } = {}) => ({ type:
 }], metadata: { updatedAt } });
 
 test('canvas clicks on OSM labels toggle details through source-scoped overlay hit testing', async () => {
+  const previousLocale = getLocale();
+  setLocale('zh-CN', { persist: false, notify: false, dispatch: false });
   const h = harness(async () => featureCollection(), {
     loadDataSource: async () => ({ show: false, entities: { values: [{
       id: 'node-1', position: Cesium.Cartesian3.fromDegrees(-97.69, 30.26),
       properties: { building: 'apartments', name: 'Example apartments' },
     }] } }),
   });
-  h.layer.setParams({ themes: ['buildings'] });
-  h.layer.init(h.viewer);
-  h.layer.enable(h.viewer);
-  await h.layer._refreshNow();
-  assert.equal(h.handlers.length, 1, 'enabling OSM must install a canvas click handler');
-  assert.equal(h.handlers[0].canvas, h.viewer.scene.canvas);
-  const click = h.handlers[0].actions.get(Cesium.ScreenSpaceEventType.LEFT_CLICK);
-  const entry = () => h.overlays.get('osm-us-themes:labels')[0];
-  assert.equal(entry().variant, 'label');
-  click({ position: { x: 10, y: 20 } });
-  assert.equal(entry().variant, 'card');
-  assert.ok(entry().details.includes('Example apartments'));
-  assert.deepEqual(h.hits.at(-1), { x: 10, y: 20, options: { sourceId: 'osm-us-themes:labels' } });
-  click({ position: { x: 500, y: 500 } });
-  assert.equal(entry().variant, 'card', 'unrelated clicks must leave OSM details alone');
-  click({ position: { x: 10, y: 20 } });
-  assert.equal(entry().variant, 'label');
-  h.layer.setParams({ labels: false });
-  const hitCount = h.hits.length;
-  click({ position: { x: 10, y: 20 } });
-  assert.equal(h.hits.length, hitCount, 'hidden OSM labels must not intercept canvas clicks');
-  h.layer.setParams({ labels: true });
-  click({});
-  assert.equal(h.hits.length, hitCount, 'malformed positions must not reach hit testing');
-  h.layer.destroy();
+  try {
+    h.layer.setParams({ themes: ['buildings'] });
+    h.layer.init(h.viewer);
+    h.layer.enable(h.viewer);
+    await h.layer._refreshNow();
+    assert.equal(h.handlers.length, 1, 'enabling OSM must install a canvas click handler');
+    assert.equal(h.handlers[0].canvas, h.viewer.scene.canvas);
+    const click = h.handlers[0].actions.get(Cesium.ScreenSpaceEventType.LEFT_CLICK);
+    const entry = () => h.overlays.get('osm-us-themes:labels')[0];
+    assert.equal(entry().variant, 'label');
+    click({ position: { x: 10, y: 20 } });
+    assert.equal(entry().variant, 'card');
+    assert.ok(entry().details.includes('Example apartments'));
+    assert.deepEqual(h.hits.at(-1), { x: 10, y: 20, options: { sourceId: 'osm-us-themes:labels' } });
+    click({ position: { x: 500, y: 500 } });
+    assert.equal(entry().variant, 'card', 'unrelated clicks must leave OSM details alone');
+    click({ position: { x: 10, y: 20 } });
+    assert.equal(entry().variant, 'label');
+    h.layer.setParams({ labels: false });
+    const hitCount = h.hits.length;
+    click({ position: { x: 10, y: 20 } });
+    assert.equal(h.hits.length, hitCount, 'hidden OSM labels must not intercept canvas clicks');
+    h.layer.setParams({ labels: true });
+    click({});
+    assert.equal(h.hits.length, hitCount, 'malformed positions must not reach hit testing');
+  } finally {
+    h.layer.destroy();
+    setLocale(previousLocale, { persist: false, notify: false, dispatch: false });
+  }
 });
 
 test('OSM canvas handlers are unique and cleaned up on viewer replacement, disable, and destroy', async () => {
