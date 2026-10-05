@@ -14,6 +14,10 @@ test('Firecrawl config is server-only and validates HTTPS endpoints', () => {
   for (const value of ['http://example.com/v2', 'https://user:pass@example.com/v2', 'https://example.com/v2?key=x']) {
     assert.throws(() => validateFirecrawlBaseUrl(value), { code: 'SEARCH_INVALID_CONFIG' });
   }
+  for (const value of ['https://10.1.2.3/v2', 'https://192.168.1.2/v2', 'https://169.254.169.254/v2',
+    'https://[fd00::1]/v2', 'https://metadata.google.internal/v2', 'https://metadata.google.internal./v2', 'https://localhost./v2']) {
+    assert.throws(() => validateFirecrawlBaseUrl(value), { code: 'SEARCH_INVALID_CONFIG' });
+  }
 });
 
 test('search sends bounded query to Firecrawl and normalizes web results', async () => {

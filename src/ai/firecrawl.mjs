@@ -1,3 +1,5 @@
+import { isSafeRemoteBaseUrlHost } from './providers.js';
+
 const DEFAULT_BASE_URL = 'https://api.firecrawl.dev/v2';
 const DEFAULT_AGENT_PRO_URL = 'http://127.0.0.1:6637/api/search';
 const MAX_QUERY_LENGTH = 500;
@@ -23,6 +25,7 @@ export function validateFirecrawlBaseUrl(value = DEFAULT_BASE_URL) {
   try { parsed = new URL(raw); } catch { throw failure('SEARCH_INVALID_CONFIG'); }
   const loopback = ['localhost', '127.0.0.1', '[::1]'].includes(parsed.hostname);
   if (!/^https?:\/\//i.test(raw) || raw.includes('\\') || parsed.username || parsed.password
+    || (!loopback && !isSafeRemoteBaseUrlHost(parsed.hostname))
     || /[?#]/.test(raw) || (parsed.protocol !== 'https:' && !(parsed.protocol === 'http:' && loopback))) {
     throw failure('SEARCH_INVALID_CONFIG');
   }

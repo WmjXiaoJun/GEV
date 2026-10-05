@@ -108,8 +108,8 @@ Only normalized feature vectors are saved, atomically, to
 `.gev-cache/voiceprints.json` (or `VOICEPRINT_STORE_PATH`); no recording is saved.
 Vectors are sensitive biometric data, stored as local JSON, not encrypted.
 Protect this directory with OS permissions and exclude it from cloud sync and
-backups as appropriate. Git ignoring a file does not prevent BaiduSyncdisk from
-syncing it. Delete a profile through Settings to remove its local vector.
+backups as appropriate. Git ignoring a file does not prevent cloud-sync tools
+from copying it. Delete a profile through Settings to remove its local vector.
 
 This is an application voice-input filter, not OS authentication or liveness
 detection: recordings or synthesized voices may pass, and local programs can

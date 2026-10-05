@@ -2374,6 +2374,20 @@ function terrainHeightsProxy() {
           res.writeHead(status, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify(bodyObj));
         };
+        const admission = admitKeySetupRequest({
+          method: req.method,
+          remoteAddress: req.socket?.remoteAddress,
+          hostHeader: req.headers?.host,
+          protocol: req.socket?.encrypted ? 'https:' : 'http:',
+          origin: req.headers?.origin,
+          contentType: req.headers?.['content-type'],
+          proxyHeaders: req.headers || {},
+          env: process.env,
+        });
+        if (!admission.ok) {
+          send(admission.status, { error: admission.error });
+          return;
+        }
         try {
           await loadDiskOnce();
           const parsedUrl = new URL(req.url || '', 'http://internal');
@@ -2412,6 +2426,20 @@ function terrainHeightsProxy() {
           res.writeHead(status, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
           res.end(JSON.stringify(body));
         };
+        const admission = admitKeySetupRequest({
+          method: req.method,
+          remoteAddress: req.socket?.remoteAddress,
+          hostHeader: req.headers?.host,
+          protocol: req.socket?.encrypted ? 'https:' : 'http:',
+          origin: req.headers?.origin,
+          contentType: req.headers?.['content-type'],
+          proxyHeaders: req.headers || {},
+          env: process.env,
+        });
+        if (!admission.ok) {
+          send(admission.status, { ok: false, error: admission.error });
+          return;
+        }
         let viewport;
         let suppliedPoints = null;
         try {

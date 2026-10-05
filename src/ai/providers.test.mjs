@@ -79,6 +79,10 @@ test('only HTTPS remote URLs and HTTP loopback URLs may receive credentials', ()
     'http://example.com/v1', 'http://192.168.1.2/v1', 'ftp://localhost/v1',
     'https://user:secret@example.com/v1', 'https://example.com/v1?key=secret',
     'https://example.com/v1#secret', 'not-a-url', 'http://localhost.evil.test/v1',
+    'https://10.1.2.3/v1', 'https://192.168.1.2/v1', 'https://169.254.169.254/latest',
+    'https://[fd00::1]/v1', 'https://metadata.google.internal/v1',
+    'https://metadata.google.internal./v1', 'https://localhost./v1',
+    'https://[::ffff:169.254.169.254]/v1', 'https://[::ffff:192.168.1.2]/v1',
   ]) {
     assert.throws(() => resolveLlmConfig({ GEV_LLM_BASE_URL: baseUrl }), { code: 'LLM_INVALID_CONFIG' });
   }
