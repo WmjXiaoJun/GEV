@@ -211,11 +211,17 @@ test('rule-based watches gate alerts by count and sustained duration', () => {
 });
 
 test('category rules and quiet hours suppress notifications while retaining the baseline', () => {
-  const watch = createWatchlist({ now: () => Date.UTC(2024, 0, 1, 14) });
+  // Quiet-hour rules are evaluated in the operator's local clock. Construct
+  // fixtures with the local Date constructor so this regression stays valid
+  // on runners whose system timezone differs from the developer machine.
+  const quietStart = new Date(2024, 0, 1, 21).getTime();
+  const quietObservation = new Date(2024, 0, 1, 22).getTime();
+  const nextObservation = new Date(2024, 0, 2, 1).getTime();
+  const watch = createWatchlist({ now: () => quietStart });
   watch.add({ ...input, rules: { categories: ['military'], quietHours: { start: 21, end: 23 } } });
-  watch.observe(snapshot([], { generatedAt: Date.UTC(2024, 0, 1, 13) }));
-  assert.deepEqual(watch.observe(snapshot([rec('a', { category: 'military' })], { generatedAt: Date.UTC(2024, 0, 1, 14) })), []);
-  assert.deepEqual(watch.observe(snapshot([rec('a', { category: 'military' }), rec('b', { category: 'civilian' })], { generatedAt: Date.UTC(2024, 0, 2, 1) })), []);
+  watch.observe(snapshot([], { generatedAt: new Date(2024, 0, 1, 20).getTime() }));
+  assert.deepEqual(watch.observe(snapshot([rec('a', { category: 'military' })], { generatedAt: quietObservation })), []);
+  assert.deepEqual(watch.observe(snapshot([rec('a', { category: 'military' }), rec('b', { category: 'civilian' })], { generatedAt: nextObservation })), []);
   assert.equal(watch.getState().alerts.length, 0);
 });
 
