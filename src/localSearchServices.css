@@ -1,0 +1,83 @@
+.local-search-services {
+  flex-shrink: 0;
+  margin-top: 14px;
+  padding-block: 12px;
+  border-block: 1px solid rgba(178, 203, 211, 0.24);
+  letter-spacing: 0;
+}
+
+.local-search-services-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.local-search-services-heading h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.local-search-services-refresh {
+  display: grid;
+  place-items: center;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid rgba(178, 203, 211, 0.35);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.local-search-services-refresh:hover,
+.local-search-services-refresh:focus-visible {
+  background: rgba(98, 189, 187, 0.18);
+  outline: 2px solid rgba(98, 189, 187, 0.8);
+  outline-offset: 2px;
+}
+
+.local-search-services-refresh:disabled { opacity: 0.5; cursor: wait; }
+.local-search-services-refresh .material-symbols-outlined { font-size: 20px; }
+
+.local-search-services table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  margin-top: 6px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.local-search-services th,
+.local-search-services td {
+  padding: 7px 6px 7px 0;
+  text-align: left;
+  vertical-align: middle;
+  overflow-wrap: anywhere;
+}
+
+.local-search-services thead th { color: #b4c6ca; font-size: 12px; font-weight: 400; }
+.local-search-services th:first-child { width: 82px; }
+.local-search-services th:last-child { width: 84px; }
+.local-search-services tbody th { font-weight: 500; }
+.local-search-services tbody tr + tr { border-top: 1px solid rgba(178, 203, 211, 0.12); }
+.local-search-services a { color: #99d6e3; text-decoration: underline; text-underline-offset: 3px; }
+.local-search-service-status { color: #d4d8dc; }
+.local-search-service-status[data-status='ok'] { color: #8bd3a7; }
+.local-search-service-status[data-status='failed'] { color: #f2aba8; }
+.local-search-services time { display: block; min-height: 18px; color: #b4c6ca; font-size: 12px; }
+
+@media (max-width: 440px) {
+  .local-search-services th:first-child { width: 72px; }
+  .local-search-services th:last-child { width: 70px; }
+}
+
+@media (max-height: 680px) {
+  #key-setup { overflow-y: auto; }
+  #key-setup .key-setup-rows { flex-shrink: 0; overflow-y: visible; }
+}

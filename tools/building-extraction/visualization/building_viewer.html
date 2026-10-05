@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>建筑物检测结果可视化</title>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0a0d12;
+            color: #e0e6ed;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .control-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(15, 19, 28, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            width: 320px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        .control-panel h2 {
+            font-size: 18px;
+            margin-bottom: 16px;
+            color: #38bdf8;
+            font-weight: 600;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(30, 38, 54, 0.8);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #38bdf8;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-label {
+            display: block;
+            font-size: 13px;
+            color: #94a3b8;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        input[type="file"],
+        input[type="number"],
+        input[type="range"] {
+            width: 100%;
+            padding: 10px;
+            background: rgba(30, 38, 54, 0.8);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 6px;
+            color: #e0e6ed;
+            font-size: 14px;
+        }
+
+        input[type="file"]::file-selector-button {
+            background: #38bdf8;
+            color: #0a0d12;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+
+        input[type="file"]::file-selector-button:hover {
+            background: #0ea5e9;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+        }
+
+        .slider-value {
+            min-width: 50px;
+            text-align: right;
+            font-weight: 600;
+            color: #38bdf8;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #38bdf8;
+            color: #0a0d12;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: #0ea5e9;
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            background: #334155;
+            color: #64748b;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #38bdf8;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid rgba(56, 189, 248, 0.2);
+            border-top: 3px solid #38bdf8;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .building-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 12px;
+        }
+
+        .building-item {
+            background: rgba(30, 38, 54, 0.6);
+            border: 1px solid rgba(56, 189, 248, 0.15);
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .building-item:hover {
+            background: rgba(30, 38, 54, 0.9);
+            border-color: rgba(56, 189, 248, 0.4);
+        }
+
+        .building-confidence {
+            display: inline-block;
+            background: rgba(56, 189, 248, 0.2);
+            color: #38bdf8;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .legend {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(56, 189, 248, 0.2);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 2px solid currentColor;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(30, 38, 54, 0.5);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(56, 189, 248, 0.5);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(56, 189, 248, 0.7);
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+
+    <div class="control-panel">
+        <h2>🏢 建筑物检测可视化</h2>
+
+        <div class="stat-grid" id="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="buildingCount">0</div>
+                <div class="stat-label">建筑物</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avgConfidence">0%</div>
+                <div class="stat-label">平均置信度</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalArea">0</div>
+                <div class="stat-label">总面积 m²</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="density">0</div>
+                <div class="stat-label">密度/km²</div>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label">加载 GeoJSON 文件</label>
+            <input type="file" id="fileInput" accept=".geojson,.json">
+        </div>
+
+        <div class="control-group">
+            <label class="control-label">置信度过滤</label>
+            <div class="slider-container">
+                <input type="range" id="confidenceSlider" min="0" max="100" value="0" step="1">
+                <span class="slider-value" id="confidenceValue">0%</span>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label">填充透明度</label>
+            <div class="slider-container">
+                <input type="range" id="opacitySlider" min="0" max="100" value="40" step="5">
+                <span class="slider-value" id="opacityValue">40%</span>
+            </div>
+        </div>
+
+        <button id="fitBoundsBtn" disabled>缩放至建筑物范围</button>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div>正在加载数据...</div>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: rgba(56, 189, 248, 0.4); color: #38bdf8;"></div>
+                <span>建筑物轮廓</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: rgba(251, 191, 36, 0.4); color: #fbbf24;"></div>
+                <span>选中建筑物</span>
+            </div>
+        </div>
+
+        <div class="building-list" id="buildingList"></div>
+    </div>
+
+    <script>
+        // 使用 OpenStreetMap（免费，无需 token）
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: {
+                version: 8,
+                sources: {
+                    'osm': {
+                        type: 'raster',
+                        tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+                        tileSize: 256,
+                        attribution: '© OpenStreetMap contributors'
+                    }
+                },
+                layers: [{
+                    id: 'osm-tiles',
+                    type: 'raster',
+                    source: 'osm',
+                    minzoom: 0,
+                    maxzoom: 19
+                }]
+            },
+            center: [116.4074, 39.9042], // 北京
+            zoom: 12
+        });
+
+        map.addControl(new mapboxgl.NavigationControl());
+
+        let buildingsData = null;
+        let filteredBuildings = [];
+        let currentOpacity = 0.4;
+
+        // 加载 GeoJSON
+        document.getElementById('fileInput').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            document.getElementById('loading').classList.add('active');
+
+            try {
+                const text = await file.text();
+                buildingsData = JSON.parse(text);
+
+                processBuildings();
+                updateStats();
+                renderBuildings();
+
+                // 缩放到建筑物范围
+                fitToBounds();
+
+                document.getElementById('fitBoundsBtn').disabled = false;
+            } catch (error) {
+                alert('加载文件失败: ' + error.message);
+            } finally {
+                document.getElementById('loading').classList.remove('active');
+            }
+        });
+
+        // 处理建筑物数据
+        function processBuildings() {
+            filteredBuildings = buildingsData.features.filter(f => {
+                const confidence = f.properties.confidence || 0;
+                const minConfidence = parseInt(document.getElementById('confidenceSlider').value) / 100;
+                return confidence >= minConfidence;
+            });
+        }
+
+        // 渲染建筑物
+        function renderBuildings() {
+            // 移除旧图层
+            if (map.getLayer('buildings-fill')) map.removeLayer('buildings-fill');
+            if (map.getLayer('buildings-outline')) map.removeLayer('buildings-outline');
+            if (map.getSource('buildings')) map.removeSource('buildings');
+
+            // 添加数据源
+            map.addSource('buildings', {
+                type: 'geojson',
+                data: {
+                    type: 'FeatureCollection',
+                    features: filteredBuildings
+                }
+            });
+
+            // 添加填充图层
+            map.addLayer({
+                id: 'buildings-fill',
+                type: 'fill',
+                source: 'buildings',
+                paint: {
+                    'fill-color': [
+                        'case',
+                        ['boolean', ['feature-state', 'selected'], false],
+                        '#fbbf24',
+                        '#38bdf8'
+                    ],
+                    'fill-opacity': currentOpacity
+                }
+            });
+
+            // 添加边框图层
+            map.addLayer({
+                id: 'buildings-outline',
+                type: 'line',
+                source: 'buildings',
+                paint: {
+                    'line-color': [
+                        'case',
+                        ['boolean', ['feature-state', 'selected'], false],
+                        '#fbbf24',
+                        '#38bdf8'
+                    ],
+                    'line-width': 2
+                }
+            });
+
+            // 添加点击事件
+            map.on('click', 'buildings-fill', (e) => {
+                const feature = e.features[0];
+                showBuildingInfo(feature);
+            });
+
+            // 添加悬停效果
+            map.on('mouseenter', 'buildings-fill', () => {
+                map.getCanvas().style.cursor = 'pointer';
+            });
+
+            map.on('mouseleave', 'buildings-fill', () => {
+                map.getCanvas().style.cursor = '';
+            });
+
+            // 更新建筑物列表
+            updateBuildingList();
+        }
+
+        // 更新统计信息
+        function updateStats() {
+            const count = filteredBuildings.length;
+            document.getElementById('buildingCount').textContent = count;
+
+            if (count === 0) {
+                document.getElementById('avgConfidence').textContent = '0%';
+                document.getElementById('totalArea').textContent = '0';
+                document.getElementById('density').textContent = '0';
+                return;
+            }
+
+            // 计算平均置信度
+            const avgConf = filteredBuildings.reduce((sum, f) =>
+                sum + (f.properties.confidence || 0), 0) / count;
+            document.getElementById('avgConfidence').textContent =
+                (avgConf * 100).toFixed(1) + '%';
+
+            // 计算总面积（简化计算）
+            const totalArea = filteredBuildings.reduce((sum, f) => {
+                const coords = f.geometry.coordinates[0];
+                return sum + calculatePolygonArea(coords);
+            }, 0);
+            document.getElementById('totalArea').textContent =
+                (totalArea / 1000000).toFixed(2);
+
+            // 计算密度
+            const bounds = getBounds(filteredBuildings);
+            const boundsArea = calculateBoundsArea(bounds);
+            const density = count / boundsArea;
+            document.getElementById('density').textContent = density.toFixed(0);
+        }
+
+        // 计算多边形面积（近似）
+        function calculatePolygonArea(coords) {
+            let area = 0;
+            const len = coords.length;
+
+            for (let i = 0; i < len - 1; i++) {
+                const [x1, y1] = coords[i];
+                const [x2, y2] = coords[i + 1];
+                area += x1 * y2 - x2 * y1;
+            }
+
+            return Math.abs(area / 2) * 111319 * 111319; // 转换为平方米（粗略）
+        }
+
+        // 获取边界
+        function getBounds(features) {
+            let minLon = Infinity, maxLon = -Infinity;
+            let minLat = Infinity, maxLat = -Infinity;
+
+            features.forEach(f => {
+                f.geometry.coordinates[0].forEach(([lon, lat]) => {
+                    minLon = Math.min(minLon, lon);
+                    maxLon = Math.max(maxLon, lon);
+                    minLat = Math.min(minLat, lat);
+                    maxLat = Math.max(maxLat, lat);
+                });
+            });
+
+            return [[minLon, minLat], [maxLon, maxLat]];
+        }
+
+        // 计算边界面积
+        function calculateBoundsArea(bounds) {
+            const [[minLon, minLat], [maxLon, maxLat]] = bounds;
+            const width = (maxLon - minLon) * 111.32 * Math.cos(minLat * Math.PI / 180);
+            const height = (maxLat - minLat) * 110.54;
+            return width * height; // km²
+        }
+
+        // 缩放到建筑物范围
+        function fitToBounds() {
+            if (!filteredBuildings.length) return;
+
+            const bounds = getBounds(filteredBuildings);
+            map.fitBounds(bounds, { padding: 50 });
+        }
+
+        // 更新建筑物列表
+        function updateBuildingList() {
+            const list = document.getElementById('buildingList');
+            list.innerHTML = '';
+
+            filteredBuildings.slice(0, 50).forEach((f, i) => {
+                const item = document.createElement('div');
+                item.className = 'building-item';
+                item.innerHTML = `
+                    <div>建筑物 #${i + 1}</div>
+                    <span class="building-confidence">
+                        ${((f.properties.confidence || 0) * 100).toFixed(1)}%
+                    </span>
+                `;
+                item.onclick = () => showBuildingInfo(f);
+                list.appendChild(item);
+            });
+
+            if (filteredBuildings.length > 50) {
+                const more = document.createElement('div');
+                more.style.textAlign = 'center';
+                more.style.padding = '10px';
+                more.style.color = '#94a3b8';
+                more.textContent = `还有 ${filteredBuildings.length - 50} 个建筑物...`;
+                list.appendChild(more);
+            }
+        }
+
+        // 显示建筑物信息
+        let selectedFeatureId = null;
+        function showBuildingInfo(feature) {
+            // 取消之前的选中
+            if (selectedFeatureId !== null) {
+                map.removeFeatureState({
+                    source: 'buildings',
+                    id: selectedFeatureId
+                });
+            }
+
+            // 选中当前建筑
+            selectedFeatureId = feature.id;
+            map.setFeatureState({
+                source: 'buildings',
+                id: selectedFeatureId
+            }, { selected: true });
+
+            // 显示 popup
+            const coords = feature.geometry.coordinates[0];
+            const center = coords.reduce((acc, c) =>
+                [acc[0] + c[0] / coords.length, acc[1] + c[1] / coords.length], [0, 0]);
+
+            new mapboxgl.Popup()
+                .setLngLat(center)
+                .setHTML(`
+                    <div style="color: #0a0d12; padding: 8px;">
+                        <strong>建筑物信息</strong><br>
+                        置信度: ${((feature.properties.confidence || 0) * 100).toFixed(1)}%<br>
+                        顶点数: ${coords.length - 1}
+                    </div>
+                `)
+                .addTo(map);
+        }
+
+        // 置信度滑块
+        document.getElementById('confidenceSlider').addEventListener('input', (e) => {
+            const value = e.target.value;
+            document.getElementById('confidenceValue').textContent = value + '%';
+
+            processBuildings();
+            updateStats();
+            renderBuildings();
+        });
+
+        // 透明度滑块
+        document.getElementById('opacitySlider').addEventListener('input', (e) => {
+            const value = e.target.value;
+            document.getElementById('opacityValue').textContent = value + '%';
+            currentOpacity = value / 100;
+
+            if (map.getLayer('buildings-fill')) {
+                map.setPaintProperty('buildings-fill', 'fill-opacity', currentOpacity);
+            }
+        });
+
+        // 缩放按钮
+        document.getElementById('fitBoundsBtn').addEventListener('click', fitToBounds);
+    </script>
+</body>
+</html>

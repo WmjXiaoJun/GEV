@@ -1,0 +1,82 @@
+.ai-assistant .ai-tabs { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+.ai-assistant .ai-tabs button { min-width: 0; min-height: 42px; padding: 8px 2px; font-size: 14px; white-space: normal; overflow-wrap: anywhere; }
+.ai-assistant #ai-intelligence-panel,
+.ai-assistant #ai-watch-panel {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 14px 18px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.ai-assistant .intel-toolbar { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.ai-assistant .intel-record-toolbar { display: grid; grid-template-columns: minmax(0, 2fr) minmax(110px, 1fr) minmax(120px, 1fr) auto auto; gap: 6px; align-items: center; margin: 12px 0 6px; }
+.ai-assistant .intel-record-toolbar input, .ai-assistant .intel-record-toolbar select { min-width: 0; width: 100%; }
+.ai-assistant .intel-record-pager { display: flex; align-items: center; gap: 8px; margin: 4px 0 8px; }
+.ai-assistant .intel-record-pager > span { flex: 1; text-align: center; }
+.ai-assistant .intel-record-list { display: grid; gap: 4px; }
+.ai-assistant .intel-record-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; text-align: left; width: 100%; padding: 8px 10px; border: 1px solid #35473f; background: #202a25; color: inherit; }
+.ai-assistant .intel-record-row:hover, .ai-assistant .intel-record-row:focus-visible { border-color: #a3cfb8; }
+.ai-assistant .intel-toolbar h3 { margin-right: auto; }
+.ai-assistant .intel-report-menu { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; padding: 4px 0; }
+.ai-assistant .intel-report-menu[hidden] { display: none; }
+.ai-assistant .intel-report-menu .intel-command { font-size: 13px; }
+.ai-assistant .intel-command { padding: 6px 10px; min-width: 0; white-space: normal; }
+.ai-assistant .intel-scope, .ai-assistant .intel-muted { margin: 6px 0; color: #b3c2bb; font-size: 14px; }
+.ai-assistant .intel-status { color: #f1bcad; margin: 6px 0; overflow-wrap: anywhere; font-size: 14px; }
+.ai-assistant .intel-summary { margin: 14px 0; }
+.ai-assistant .intel-detail { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 8px; padding: 2px 0; }
+.ai-assistant .intel-detail dt { color: #b3c2bb; }
+.ai-assistant .intel-detail dd { margin: 0; overflow-wrap: anywhere; }
+.ai-assistant .intel-layer, .ai-assistant .intel-area, .ai-assistant .intel-alert { padding: 14px 0; border-top: 1px solid #35473f; min-width: 0; overflow-wrap: anywhere; }
+.ai-assistant .intel-layer-heading { display: flex; align-items: baseline; gap: 8px; justify-content: space-between; flex-wrap: wrap; }
+.ai-assistant h3 { margin: 0; font-size: 15px; font-weight: 600; }
+.ai-assistant .intel-layer-status { color: #b6ddc8; font-size: 14px; }
+.ai-assistant .intel-layer dl, .ai-assistant .intel-alert dl { margin: 8px 0 0; }
+.ai-assistant .intel-samples { list-style: none; padding: 0; margin: 10px 0 0; }
+.ai-assistant .intel-samples li + li { margin-top: 10px; }
+.ai-assistant .intel-record-meta { display: block; color: #b3c2bb; font-size: 14px; overflow-wrap: anywhere; }
+.ai-assistant .intel-simulated { display: inline-block; margin-left: 8px; color: #e5cc98; font-size: 14px; }
+.ai-assistant .intel-watch-form { display: grid; gap: 8px; margin-bottom: 10px; }
+.ai-assistant .intel-area-bounds { font-size: 14px; color: #b3c2bb; margin: 6px 0; }
+.ai-assistant .intel-area-controls { display: flex; align-items: center; gap: 8px; }
+.ai-assistant .intel-watch-rules { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 38px; gap: 8px; margin: 8px 0; }
+.ai-assistant .intel-watch-rules input, .ai-assistant .intel-alert input { min-width: 0; width: 100%; }
+.ai-assistant .intel-alert > input { margin-top: 8px; }
+.ai-assistant .intel-area-name { display: grid; grid-template-columns: minmax(0, 1fr) 38px; align-items: center; gap: 8px; }
+.ai-assistant .intel-pause { display: inline-flex; align-items: center; gap: 8px; margin-right: auto; font-size: 14px; }
+.ai-assistant .intel-pause input[type="checkbox"] { width: 18px; height: 18px; margin: 0; accent-color: #a3cfb8; }
+.ai-assistant .intel-unread { min-width: 2ch; font-size: 14px; color: #e5cc98; text-align: center; }
+.ai-assistant .intel-alert[data-read="false"] > strong { color: #e5cc98; }
+.ai-assistant #ai-action-review { flex: 0 0 auto; padding: 12px 18px; border-bottom: 1px solid #65735d; background: #232b27; max-height: 42%; overflow: auto; font-size: 14px; line-height: 1.6; }
+.ai-assistant #ai-action-review h3 { margin-bottom: 5px; color: #e5cc98; }
+.ai-assistant .intel-action-params { margin: 6px 0; }
+.ai-assistant .intel-action-countdown { margin: 6px 0; min-height: 26px; font-size: 16px; font-weight: 600; font-variant-numeric: tabular-nums; color: #e5cc98; overflow-wrap: anywhere; }
+.ai-assistant .intel-action-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.ai-assistant #intel-action-confirm { background: #a3cfb8; color: #112a1e; border-color: #a3cfb8; }
+.ai-assistant .terrain-analysis { margin: 10px 0 16px; padding: 12px 0 4px; border-top: 1px solid #35473f; }
+.ai-assistant .terrain-analysis-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.ai-assistant .terrain-analysis-heading h3 { margin: 0; }
+.ai-assistant .terrain-analysis-status { min-height: 20px; margin: 5px 0; color: #b3c2bb; font-size: 13px; }
+.ai-assistant .terrain-analysis-summary { margin: 5px 0 8px; color: #dbe8df; overflow-wrap: anywhere; }
+.ai-assistant .terrain-analysis-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 14px; margin: 8px 0; }
+.ai-assistant .terrain-analysis-metric { display: flex; justify-content: space-between; gap: 8px; border-bottom: 1px solid #26362f; padding: 3px 0; }
+.ai-assistant .terrain-analysis-metric dt { color: #b3c2bb; }
+.ai-assistant .terrain-analysis-metric dd { margin: 0; color: #b6ddc8; font-variant-numeric: tabular-nums; }
+.ai-assistant .terrain-analysis-chart { position: relative; min-height: 100px; margin-top: 8px; border: 1px solid #35473f; background: #101a16; overflow: hidden; }
+.ai-assistant .terrain-analysis-chart svg { display: block; width: 100%; height: 100px; }
+.ai-assistant .terrain-analysis-profile { fill: none; stroke: #a3cfb8; stroke-width: 2; vector-effect: non-scaling-stroke; }
+.ai-assistant .terrain-grade-legend { display: flex; flex: 0 0 auto; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 8px 0; font-size: 13px; line-height: 1.5; color: #ccd9d2; border-top: 1px solid #35473f; letter-spacing: 0; }
+.ai-assistant .terrain-grade-legend[hidden] { display: none; }
+.ai-assistant .terrain-grade-item { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.ai-assistant .terrain-grade-item i { display: block; width: 16px; height: 3px; flex: 0 0 16px; }
+.ai-assistant .terrain-point-legend { flex-basis: 100%; font-size: 13px; overflow-wrap: anywhere; }
+.ai-assistant .terrain-analysis-empty { position: absolute; inset: 34px 8px; margin: 0; text-align: center; color: #83978d; font-size: 13px; }
+@media (max-width: 480px) {
+  .ai-assistant #ai-intelligence-panel, .ai-assistant #ai-watch-panel, .ai-assistant #ai-action-review { padding: 12px 14px; }
+  .ai-assistant .intel-detail { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 6px; }
+  .ai-assistant .intel-record-toolbar { grid-template-columns: minmax(0, 1fr) auto; }
+  .ai-assistant .intel-record-toolbar input, .ai-assistant .intel-record-toolbar select { grid-column: 1 / -1; }
+}

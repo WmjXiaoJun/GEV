@@ -1,0 +1,6 @@
+fastapi==0.141.1
+uvicorn==0.52.4
+ultralytics==8.4.148
+Pillow==12.3.0
+pydantic==2.13.5
+urllib3>=2.8.0
